@@ -8,8 +8,14 @@ namespace ReportGrabber.Schemas
 {
     public struct Field
     {
-        private Address _address;
         private string _name;
+        private Address _address;
+
+        public string Name
+        { get { return _name; } }
+
+        public Address Address
+        { get { return _address; } }
 
         public Field(string name, string address)
         {
