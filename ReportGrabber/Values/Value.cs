@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SXCore.Lexems;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,7 +34,7 @@ namespace ReportGrabber.Values
             if (number != null)
                 return number.Value;
 
-            throw new NotSupportedException("Can't convert Value to Double");
+            throw new ArgumentException("Can't convert Value to Double");
         }
 
         static public implicit operator Value(decimal value)
@@ -54,7 +55,60 @@ namespace ReportGrabber.Values
             if (number != null)
                 return number.Value;
 
-            throw new NotSupportedException("Can't convert Value to DateTime");
+            throw new ArgumentException("Can't convert Value to DateTime");
+        }
+
+        static public implicit operator SXLexemVariable(Value value)
+        {
+            if (value == null)
+                return "";
+
+            switch (value.Type)
+            {
+                case Value.ValueType.Date:
+                    return (value as ValueDate).Value;
+                case Value.ValueType.Number:
+                    return (value as ValueNumber).Value;
+                case Value.ValueType.Text:
+                    return (value as ValueText).Value;
+                default:
+                    return value.ToString();
+            }
+        }
+
+        static public implicit operator Value(SXLexemVariable variable)
+        {
+            if (variable == null || variable.Value == null)
+                return "";
+
+            switch (variable.Value.Type)
+            {
+                case SXLexemValue.ValueType.Date:
+                    return (variable.Value as SXLexemDate).Value;
+                case SXLexemValue.ValueType.Number:
+                    return (variable.Value as SXLexemNumber).Value;
+                case SXLexemValue.ValueType.Text:
+                    return (variable.Value as SXLexemText).Value;
+                default:
+                    return variable.Value.ToString();
+            }
+        }
+
+        static public ValueType ParseValueType(string input)
+        {
+            switch (input.Trim().ToLower())
+            {
+                case "date":
+                case "datetime":
+                    return Value.ValueType.Date;
+
+                case "number":
+                case "int":
+                case "double":
+                    return Value.ValueType.Number;
+
+                default: return Value.ValueType.Text;
+            }
         }
     }
 }

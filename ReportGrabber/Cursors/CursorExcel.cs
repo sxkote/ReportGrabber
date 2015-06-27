@@ -1,5 +1,6 @@
 ﻿using ReportGrabber.Schemas;
 using ReportGrabber.Values;
+using SXCore.Lexems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +12,10 @@ namespace ReportGrabber.Cursors
 {
     public abstract class CursorExcel : Cursor
     {
-        public const string ExcelAddressPattern = @"(?i)^r(?<rownum>(\+|\-)?\d+)?c(?<colnum>(\+|\-)?\d+)?$";
+        public const string ExcelAddressPattern = @"(?i)^r(?<rownum>\d+)?c(?<colnum>\d+)?$";
 
         #region Variables
+        protected SXEnvironment _environment;
         protected int _row = -1;
         #endregion
 
@@ -23,19 +25,30 @@ namespace ReportGrabber.Cursors
             get
             {
                 if (_mapping == null)
+                    throw new CursorNoMappingException();
+
+                if (String.IsNullOrEmpty(_mapping.Range.InitPosition))
                     return 0;
 
-                var init = this.GetValue(_mapping.InitPosition) as ValueNumber;
-                if (init == null)
-                    return 0;
+                int row = 0;
+                if (Int32.TryParse(_mapping.Range.InitPosition, out row))
+                    return row;
 
-                return (int)init.Value;
+                return 0;
             }
         }
         #endregion
 
+        #region Constructors
+        public CursorExcel()
+        {
+            _environment = new SXEnvironment();
+            _environment.FunctionExecuting += this.OnFunctionExecuting;
+        }
+        #endregion
+
         #region Functions
-        protected virtual void SetRow(int row)
+        protected void SetRow(int row)
         {
             _row = row;
         }
@@ -43,33 +56,86 @@ namespace ReportGrabber.Cursors
         public override bool MoveNext()
         {
             if (_mapping == null)
-                return false;
+                throw new CursorNoMappingException();
 
             this.SetRow(_row < 0 ? this.InitRow : _row + 1);
 
-            return !this.CheckCondition(_mapping.FinishCondition);
+            int column = 0;
+            if (Int32.TryParse(_mapping.Range.FinishCondition, out column))
+            {
+                // if in Condition field Column number to check is entered
+                return !String.IsNullOrEmpty(this.GetValue(_row, column));
+            }
+
+            return !this.CheckCondition(_mapping.Range.FinishCondition);
         }
 
-        public override Value GetValue(Address address)
+        protected override bool CheckCondition(Condition condition)
         {
-            if (String.IsNullOrEmpty(address.Uri))
+            return (SXExpression.Calculate(condition, _environment).Value as SXLexemBool).Value == SXLexemBool.BoolType.True;
+        }
+
+        protected SXLexemVariable OnFunctionExecuting(SXLexemFunction function)
+        {
+            Func<int, int> getindex = i => (int)(function.Arguments[i].Calculate(_environment).Value as SXLexemNumber).Value;
+            Func<int, Value.ValueType> gettype = i => Value.ParseValueType((function.Arguments[i].Calculate(_environment).Value as SXLexemText).Value);
+
+            if (function.Name.Equals("rowcol", StringComparison.InvariantCultureIgnoreCase) || function.Name.Equals("rc", StringComparison.InvariantCultureIgnoreCase))
+            {
+                #region Get the Value on the exact Row and Column
+                if (function.Arguments.Count == 2)
+                    return this.GetValue(getindex(0), getindex(1));
+                else if (function.Arguments.Count == 3)
+                    return this.GetValue(getindex(0), getindex(1), gettype(2));
+                #endregion
+            }
+
+            if (function.Name.Equals("cell", StringComparison.InvariantCultureIgnoreCase) || function.Name.Equals("c", StringComparison.InvariantCultureIgnoreCase))
+            {
+                #region Get the Value on the relative [Row] (row is optional) and Column
+                if (function.Arguments.Count == 1)
+                    return this.GetValue(_row, getindex(0));
+                else if (function.Arguments.Count == 2)
+                {
+                    var second = function.Arguments[1].Calculate(_environment).Value;
+                    if (second.Type == SXLexemValue.ValueType.Number)
+                        return this.GetValue(_row + getindex(0), getindex(1));
+                    else
+                        return this.GetValue(_row, getindex(0), gettype(1));
+                }
+                else if (function.Arguments.Count == 3)
+                    return this.GetValue(_row + getindex(0), getindex(1), gettype(2));
+                #endregion
+            }
+
+            throw new CursorException(String.Format("Expression Function not recognized: {0}", function.Name));
+        }
+
+        protected override Value GetValue(Address address, Value.ValueType type = Value.ValueType.Text)
+        {
+            if (address == null || String.IsNullOrEmpty(address.Uri))
                 return "";
 
             var adr = address.Uri;
 
-            #region Expression
-            //if (adr.StartsWith("=") && adr.Length > 1)
-            //    return this.GetCalc(new SXExpression(adr.Substring(1)));
-            #endregion
+            //calculate expression
+            if (adr.StartsWith("=") && adr.Length > 1)
+                return SXExpression.Calculate(adr.Substring(1), _environment);
 
+            //calculate column index or RC value
             int row = _row, col = 0;
             if (Int32.TryParse(adr, out col) || CursorExcel.ParseExcelAddress(adr, ref row, ref col))
-                return this.GetValue(row, col, address.Type);
+                return this.GetValue(row, col, type);
 
+            //get '...' value
+            if (adr.Length >= 2 && adr.IndexOf('\'') == 0 && adr.IndexOf('\'', 1) == adr.Length-1)
+                return adr.Substring(1, adr.Length - 2);
+
+            //get concatination ... + ... + ...
             if (adr.Contains('+'))
                 return String.Join("", adr.Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries).Select(part => this.GetValue(part).ToString()));
 
-            throw new FormatException(String.Format("Excel Address not recognized: {0}", adr));
+            throw new CursorException(String.Format("Excel Address not recognized: {0}", adr));
         }
 
         protected abstract Value GetValue(int row, int col, Value.ValueType type = Value.ValueType.Text);
@@ -94,10 +160,10 @@ namespace ReportGrabber.Cursors
                 return false;
 
             if (!String.IsNullOrEmpty(rowText))
-                row = rowText.StartsWith("+") || rowText.StartsWith("-") ? row + rowValue : rowValue;
+                row = rowValue;
 
             if (!String.IsNullOrEmpty(colText))
-                col = colText.StartsWith("+") || colText.StartsWith("-") ? col + colValue : colValue;
+                col = colValue;
 
             return true;
         }

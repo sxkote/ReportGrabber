@@ -9,20 +9,42 @@ namespace ReportGrabber.Schemas
     public class Mapping
     {
         protected ReportType _type;
-        protected Address _initPosition;
-        protected Condition _finishCondition;
-        protected IEnumerable<Condition> _conditions;
+        protected Range _range;
+        protected IEnumerable<Condition> _matches;
+        protected IEnumerable<Field> _fields;
+        protected IEnumerable<Rule> _rules;
 
         public ReportType Type
         { get { return _type; } }
 
-        public Address InitPosition
-        { get { return _initPosition; } }
+        public Range Range
+        {
+            get { return _range; }
+            set { _range = value; }
+        }
 
-        public Condition FinishCondition
-        { get { return _finishCondition; } }
+        public IEnumerable<Condition> Matches
+        {
+            get { return _matches; }
+            set { _matches = value; }
+        }
 
-        public IEnumerable<Condition> Conditions
-        { get { return _conditions; } }
+        public IEnumerable<Field> Fields
+        {
+            get { return _fields; }
+            set { _fields = value; }
+        }
+
+        public IEnumerable<Rule> Rules
+        {
+            get { return _rules; }
+            set { _rules = value; }
+        }
+
+        public Mapping(ReportType type)
+        {
+            _type = type;
+        }
+
     }
 }

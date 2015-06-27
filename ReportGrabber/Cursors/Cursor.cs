@@ -1,5 +1,6 @@
 ﻿using ReportGrabber.Schemas;
 using ReportGrabber.Values;
+using SXCore.Lexems;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,161 +10,85 @@ using System.Threading.Tasks;
 
 namespace ReportGrabber.Cursors
 {
-    public abstract class Cursor
+    public interface ICursor
+    {
+        Mapping Mapping { get; }
+        bool MoveNext();
+        DataCollection GetData();
+    }
+
+    public abstract class Cursor : ICursor
     {
         #region Variables
-        protected byte[] _data = null;
         protected Mapping _mapping = null;
         #endregion
 
-        #region Virtual
-        public bool IsSkip()
+        #region Properties
+        public Mapping Mapping
+        { get { return _mapping; } }
+        #endregion
+
+        #region Constructor
+        protected Cursor()
         {
-            //if (this.Schema == null || this.Schema.Rules == null) return true;
 
-            //foreach (SXSchemaRule r in this.Schema.Rules)
-            //    if (r.Name.Trim().ToLower() == "skip")
-            //    {
-            //        if (this.Schema.Fields[r.Param] != null)
-            //        {
-            //            if (this.GetFieldString(r.Param).Trim().ToLower().Contains(r.Value.Trim().ToLower()))
-            //                return true;
-            //        }
-            //        else
-            //        {
-            //            if (this.GetValue(new SXSchemaAddress(r.Param)).Trim().ToLower() == r.Value.Trim().ToLower())
-            //                return true;
-            //        }
-            //    }
-
-            return false;
-        }
-
-        protected void Map(ICollection<Mapping> mappings)
-        {
-            _mapping = mappings == null ? null : mappings.FirstOrDefault(m => m.Conditions.All(c => this.CheckCondition(c)));
-        }
-
-        protected bool CheckCondition(Condition condition)
-        {
-            return this.GetValue(condition.Address).ToString().ToLower() == condition.Value.Trim().ToLower();
-        }
-
-        public abstract bool MoveNext();
-
-        public abstract Value GetValue(Address address);
-
-        public Data GetData(Field field)
-        {
-            return new Data(field.Name, this.GetValue(field.Address));
         }
         #endregion
 
-        #region Statics
-        static public Cursor DefineCursor(byte[] data, ICollection<Mapping> mappings)
+        #region Virtual
+        public abstract bool MoveNext();
+
+        protected abstract Value GetValue(Address address, Value.ValueType type = Value.ValueType.Text);
+
+        protected abstract bool CheckCondition(Condition condition);
+        #endregion
+
+        #region Functions
+        /// <summary>
+        /// Defines the appropriate Mapping for current Report from the Mappings list
+        /// </summary>
+        /// <param name="mappings">List of the available Mappings to select from</param>
+        protected void Map(IEnumerable<Mapping> mappings)
         {
-            using (var ms = new MemoryStream(data))
-            {
-                try //пытаемся установить курсор в формате Excel2003
-                {
-                    ExcelLibrary.SpreadSheet.Workbook wb = ExcelLibrary.SpreadSheet.Workbook.Load(ms);
-                    if (wb.Worksheets != null && wb.Worksheets.Count > 0)
-                        return new CursorExcel2003(data, mappings);
-                }
-                catch { ms.Position = 0; }
-
-                try //пытаемся установить курсор в формате Excel2007
-                {
-                        OfficeOpenXml.ExcelWorkbook wb = (new OfficeOpenXml.ExcelPackage(ms)).Workbook;
-                        if (wb != null && wb.Worksheets != null && wb.Worksheets.Count > 0)
-                        return new CursorExcel2007(data, mappings);
-                }
-                catch { ms.Position = 0; }
-
-                //try //пытаемся установить курсор в формате XML
-                //{
-                //    SXCursorXML xml_cursor = new SXCursorXML(ms);
-                //    if (xml_cursor != null && xml_cursor.Document != null)
-                //        cursor = xml_cursor;
-                //}
-                //catch { ms.Position = 0; }
-            }
-
-            return null;
+            _mapping = mappings == null ? null : mappings.FirstOrDefault(m => m.Matches.All(c => this.CheckCondition(c)));
         }
 
-        //static public Cursor DefineCursor(byte[] data, ICollection<Mapping> mappings)
-        //{
-        //    SXCursor cursor = null;
+        /// <summary>
+        /// Defines if the current position should be skipped from getting Data (row in excel, node in xml, etc)
+        /// </summary>
+        /// <returns>True if the current position should be skipped</returns>
+        protected bool IsSkip()
+        {
+            if (_mapping == null)
+                throw new CursorNoMappingException();
 
-        //    #region Excel2003
-        //    if (cursor == null)
-        //    {
-        //        try //пытаемся установить курсор в формате Excel2003
-        //        {
-        //            using (MemoryStream ms = new MemoryStream(data))
-        //            {
-        //                ExcelLibrary.SpreadSheet.Workbook wb = ExcelLibrary.SpreadSheet.Workbook.Load(ms);
-        //                if (wb.Worksheets != null && wb.Worksheets.Count > 0)
-        //                    cursor = new SXCursorExcel2003(wb.Worksheets[0]);
-        //            }
-        //        }
-        //        catch { cursor = null; }
-        //    }
-        //    #endregion
+            // if there are no rules then no Skip
+            if (_mapping.Rules == null || _mapping.Rules.Count() <= 0)
+                return false;
 
-        //    #region Excel2007
-        //    if (cursor == null)
-        //    {
-        //        try //пытаемся установить курсор в формате Excel2007
-        //        {
-        //            using (MemoryStream ms = new MemoryStream(data))
-        //            {
-        //                OfficeOpenXml.ExcelWorkbook wb = (new OfficeOpenXml.ExcelPackage(ms)).Workbook;
-        //                if (wb != null && wb.Worksheets != null && wb.Worksheets.Count > 0)
-        //                    cursor = new SXCursorExcel2007(wb.Worksheets.First());
-        //            }
-        //        }
-        //        catch { cursor = null; }
-        //    }
-        //    #endregion
+            // find all Skip rules 
+            var skip = _mapping.Rules.Where(r => r.Name.Equals("skip", StringComparison.InvariantCultureIgnoreCase));
+            if (skip == null || skip.Count() <= 0)
+                return false;
 
-        //    #region XML
-        //    if (cursor == null)
-        //    {
-        //        try //пытаемся установить курсор в формате XML
-        //        {
-        //            using (MemoryStream ms = new MemoryStream(data))
-        //            {
-        //                SXCursorXML xml_cursor = new SXCursorXML(ms);
-        //                if (xml_cursor != null && xml_cursor.Document != null)
-        //                    cursor = xml_cursor;
-        //            }
-        //        }
-        //        catch { cursor = null; }
-        //    }
-        //    #endregion
+            // check if any Skip rule passed
+            return skip.Any(r => this.CheckCondition(r.Condition));
+        }
 
-        //    if (cursor == null || cursor.MappingType == SXSchema.SXMappingType.None)
-        //        return null;
+        /// <summary>
+        /// Get DataCollection from the Report on the current position (row, node, etc.)
+        /// </summary>
+        /// <returns>DataCollection defined by Fields in the Mapping</returns>
+        public DataCollection GetData()
+        {
+            if (_mapping == null)
+                throw new CursorNoMappingException();
 
-        //    #region Define Mapping from list for current Cursor and CursorType
-        //    foreach (SXSchema schema in schema_list)
-        //    {
-        //        if (schema == null || schema.MappingType != cursor.MappingType)
-        //            continue;
+            if (this.IsSkip())
+                return null;
 
-        //        cursor.Schema = schema;
-
-        //        if (cursor.CheckCondition())
-        //            return cursor;
-        //        else
-        //            cursor.Schema = null;
-        //    }
-        //    #endregion
-
-        //    return null;
-        //}
+            return new DataCollection(_mapping.Fields.Select(f => new Data(f.Name, this.GetValue(f.Address, f.Type))));
+        }
         #endregion
     }
 }

@@ -14,6 +14,15 @@ namespace ReportGrabber
         public IList<Data> Values
         { get { return _values.AsReadOnly(); } }
 
+        public Value this[string name]
+        {
+            get
+            {
+                var data = this.Get(name);
+                return data == null ? null : data.Value;
+            }
+        }
+
         public DataCollection()
         {
             _values = new List<Data>();

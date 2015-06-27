@@ -8,17 +8,20 @@ namespace ReportGrabber.Schemas
 {
     public struct Condition
     {
-        private Address _address;
         private string _value;
 
-        public Address Address { get { return _address; } }
+        public string Value 
+        { get { return _value; } }
 
-        public string Value { get { return _value; } }
-
-        public Condition(Address address, string value)
+        public Condition(string value)
         {
-            _address = address;
             _value = value;
         }
+
+        static public implicit operator string(Condition condition)
+        { return condition.Value; }
+
+        static public implicit operator Condition(string condition)
+        { return new Condition(condition); }
     }
 }

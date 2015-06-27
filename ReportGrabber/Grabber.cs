@@ -1,53 +1,51 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using ReportGrabber.Values;
 using ReportGrabber.Schemas;
+using ReportGrabber.Services;
 
 namespace ReportGrabber
 {
+    public interface IGrabber
+    {
+        IEnumerable<DataCollection> Grab(Report report);
+    }
+
     public class Grabber : IGrabber
     {
-        protected ICollection<Mapping> _mappings;
+        protected ICursorSelector _cursorSelector;
+        protected IEnumerable<Mapping> _mappings;
 
-        public Grabber(ICollection<Mapping> mappings)
+        public Grabber(IEnumerable<Mapping> mappings, ICursorSelector cursorSelector = null)
         {
             _mappings = mappings;
+            _cursorSelector = cursorSelector == null ? new CursorSelector() : cursorSelector;
         }
 
-        public IEnumerable<DataCollection> Grab(byte[] data)
+        public IEnumerable<DataCollection> Grab(Report report)
         {
-            //if (data == null || data.Length <= 0)
-            //    throw new ArgumentNullException("Empty Data can't be grabbed!");
+            var cursor = _cursorSelector.DefineCursor(report, _mappings);
 
-            //List<DataCollection> result = new List<DataCollection>();
+            var result = new List<DataCollection>();
+            while (cursor.MoveNext())
+            {
+                var collection = cursor.GetData();
+                if (collection != null)
+                    result.Add(collection);
+            }
 
-            //    SXCursor cursor = null;
+            return result;
+        }
 
-            //    try
-            //    {
-            //        using (MemoryStream ms = new MemoryStream(data))
-            //            cursor = SXCursor.DefineCursor(ms, schemas);
-            //    }
-            //    catch { cursor = null; }
+        static public IEnumerable<DataCollection> Grab(Report report, params Mapping[] mappings)
+        {
+            return new Grabber(mappings).Grab(report);
+        }
 
-            //    if (cursor == null || cursor.Schema == null)
-            //    {
-            //        this.Error("Error", "ImportProcess.Schema.NotFound", "");
-            //        return;
-            //    }
-
-            //    #region Import Duty
-            //    while (cursor.MoveNext())
-            //        if (!cursor.IsSkip)
-            //        {
-            //            SXImportDuty duty = cursor.CreateDuty();
-
-            //            if (this.CheckDuty(duty))
-            //                this.AddDuty(duty);
-            //        }
-            //    #endregion
-
-            //    this.AgregateDuty();
+        static public IEnumerable<DataCollection> Grab(byte[] data, params Mapping[] mappings)
+        {
+            return new Grabber(mappings).Grab(Report.Load(data));
         }
     }
 }

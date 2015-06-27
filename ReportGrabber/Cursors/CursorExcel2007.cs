@@ -17,17 +17,15 @@ namespace ReportGrabber.Cursors
         #endregion
 
         #region Constructor
-        public CursorExcel2007(byte[] data, ICollection<Mapping> mappings)
+        public CursorExcel2007(byte[] data, IEnumerable<Mapping> mappings)
         {
-            _data = data;
-
             var wb = (new ExcelPackage(new MemoryStream(data))).Workbook;
             if (wb == null || wb.Worksheets == null || wb.Worksheets.Count <= 0)
-                throw new NotSupportedException("Data was not recognized as Excel2007");
+                throw new ReportFormatException("Data was not recognized as Excel2007");
 
             _worksheet = wb.Worksheets.First();
 
-            this.Map(mappings.Where(m => m.Type == ReportType.Excel2007).ToList());
+            this.Map(mappings.Where(m => m.Type == ReportType.Excel2007));
         }
         #endregion
 
@@ -35,12 +33,12 @@ namespace ReportGrabber.Cursors
         protected override Value GetValue(int row, int col, Value.ValueType type = Value.ValueType.Text)
         {
             if (_worksheet == null)
-                throw new ArgumentNullException("Worksheet");
+                throw new CursorException("Worksheet is Null for Excel2007 Cursor");
 
-            if (row < 0 || col < 0)
-                throw new IndexOutOfRangeException("Row and Column Indexes can't be negative");
+            if (row <= 0 || col <= 0)
+                throw new CursorException("Row and Column Indexes should be positive (>=1)");
 
-            var range = _worksheet.Cells[row + 1, col + 1];
+            var range = _worksheet.Cells[row, col];
             if (range == null || range.Value == null)
                 return "";
 

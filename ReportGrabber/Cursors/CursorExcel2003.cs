@@ -17,17 +17,15 @@ namespace ReportGrabber.Cursors
         #endregion
 
         #region Constructor
-        public CursorExcel2003(byte[] data, ICollection<Mapping> mappings)
+        public CursorExcel2003(byte[] data, IEnumerable<Mapping> mappings)
         {
-            _data = data;
-
-            Workbook wb = Workbook.Load(new MemoryStream(data));
+            var wb = Workbook.Load(new MemoryStream(data));
             if (wb == null || wb.Worksheets.Count <= 0)
-                throw new NotSupportedException("Data was not recognized as Excel2003");
+                throw new ReportFormatException("Data was not recognized as Excel2003");
 
             _worksheet = wb.Worksheets[0];
 
-            this.Map(mappings.Where(m => m.Type == ReportType.Excel2003).ToList());
+            this.Map(mappings.Where(m => m.Type == ReportType.Excel2003));
         }
         #endregion
 
@@ -35,12 +33,12 @@ namespace ReportGrabber.Cursors
         protected override Value GetValue(int row, int col, Value.ValueType type = Value.ValueType.Text)
         {
             if (_worksheet == null)
-                throw new ArgumentNullException("Worksheet");
+                throw new CursorException("Worksheet is Null for Excel2003 Cursor");
 
-            if (row < 0 || col < 0)
-                throw new IndexOutOfRangeException("Row and Column Indexes can't be negative");
+            if (row <= 0 || col <= 0)
+                throw new CursorException("Row and Column Indexes should be positive (>=1)");
 
-            var cell = _worksheet.Cells[row, col];
+            var cell = _worksheet.Cells[row-1, col-1];
             if (cell == null || cell.Value == null || cell.IsEmpty)
                 return "";
 
