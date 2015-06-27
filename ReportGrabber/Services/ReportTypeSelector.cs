@@ -14,6 +14,13 @@ namespace ReportGrabber.Services
 
     public class ReportTypeSelector : IReportTypeSelector
     {
+        protected readonly bool _openFile;
+
+        public ReportTypeSelector(bool openFile = true)
+        {
+            _openFile = openFile;
+        }
+
         public ReportType DefineReportType(byte[] data, string filename = "")
         {
             if (data == null || data.Length <= 0)
@@ -22,35 +29,37 @@ namespace ReportGrabber.Services
             if (filename.EndsWith(".xlsx", StringComparison.InvariantCultureIgnoreCase))
             {   
                 // try to define ReportType by file extension (.xlsx => Excel 2007)
-                if (this.TryExcel2007(data))
+                if (!_openFile || this.TryOpenExcel2007(data))
                     return ReportType.Excel2007;
             }
             else if (filename.EndsWith(".xls", StringComparison.InvariantCultureIgnoreCase))
             {
                 // try to define ReportType by file extension (.xls => Excel 2003)
-                if (this.TryExcel2003(data))
+                if (!_openFile || this.TryOpenExcel2003(data))
                     return ReportType.Excel2003;
             }
 
-            // try to define ReportType only by Data
+            // try to define ReportType by opening the Data
+            if (_openFile)
+            {
+                if (this.TryOpenExcel2003(data))
+                    return ReportType.Excel2003;
 
-            if (this.TryExcel2003(data))
-                return ReportType.Excel2003;
-
-            if (this.TryExcel2007(data))
-                return ReportType.Excel2007;
+                if (this.TryOpenExcel2007(data))
+                    return ReportType.Excel2007;
+            }
 
             return ReportType.Unknown;
         }
 
-        protected bool TryExcel2003(byte[] data)
+        protected bool TryOpenExcel2003(byte[] data)
         {
             try //пытаемся установить курсор в формате Excel2003
             {
                 using (var ms = new MemoryStream(data))
                 {
-                    var wb = ExcelLibrary.SpreadSheet.Workbook.Load(ms);
-                    if (wb.Worksheets != null && wb.Worksheets.Count > 0)
+                    var workbook = ExcelLibrary.SpreadSheet.Workbook.Load(ms);
+                    if (workbook.Worksheets != null && workbook.Worksheets.Count > 0)
                         return true;
                 }
             }
@@ -59,7 +68,7 @@ namespace ReportGrabber.Services
             return false;
         }
 
-        protected bool TryExcel2007(byte[] data)
+        protected bool TryOpenExcel2007(byte[] data)
         {
             try //пытаемся установить курсор в формате Excel2003
             {

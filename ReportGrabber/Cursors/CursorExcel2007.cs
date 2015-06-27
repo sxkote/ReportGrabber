@@ -12,24 +12,17 @@ namespace ReportGrabber.Cursors
 {
     public class CursorExcel2007 : CursorExcel
     {
-        #region Variables
         protected ExcelWorksheet _worksheet = null;
-        #endregion
 
-        #region Constructor
-        public CursorExcel2007(byte[] data, IEnumerable<Mapping> mappings)
+        public CursorExcel2007(byte[] data)
         {
             var wb = (new ExcelPackage(new MemoryStream(data))).Workbook;
             if (wb == null || wb.Worksheets == null || wb.Worksheets.Count <= 0)
                 throw new ReportFormatException("Data was not recognized as Excel2007");
 
             _worksheet = wb.Worksheets.First();
-
-            this.Map(mappings.Where(m => m.Type == ReportType.Excel2007));
         }
-        #endregion
 
-        #region Functions
         protected override Value GetValue(int row, int col, Value.ValueType type = Value.ValueType.Text)
         {
             if (_worksheet == null)
@@ -47,6 +40,5 @@ namespace ReportGrabber.Cursors
 
             return range.Value.ToString();
         }
-        #endregion
     }
 }

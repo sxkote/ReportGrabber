@@ -32,7 +32,7 @@ namespace Tests.ReportGrabber
             var mapping = new Mapping(ReportType.Excel2003)
             {
                 Range = new Range("2", "6"),
-                Matches = new List<Condition>() { "rc(1;1) == \"Кредитор\"" },
+                Match = "rc(1;1) == \"Кредитор\"",
                 Rules = new List<Rule>() { new Rule("skip", "cell(4).tostring() == \"\"") },
                 Fields = new List<Field>()
                 { 

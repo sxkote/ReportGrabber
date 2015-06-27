@@ -47,14 +47,4 @@ namespace ReportGrabber
         public CursorException(string message)
             : base(message) { }
     }
-
-    public class CursorNoMappingException : CursorException
-    {
-        public CursorNoMappingException()
-            : base("Cursor has no Mapping defined") { }
-
-        public CursorNoMappingException(string message)
-            : base(message) { }
-    }
-
 }

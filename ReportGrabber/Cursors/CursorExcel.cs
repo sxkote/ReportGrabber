@@ -19,26 +19,6 @@ namespace ReportGrabber.Cursors
         protected int _row = -1;
         #endregion
 
-        #region Properties
-        protected int InitRow
-        {
-            get
-            {
-                if (_mapping == null)
-                    throw new CursorNoMappingException();
-
-                if (String.IsNullOrEmpty(_mapping.Range.InitPosition))
-                    return 0;
-
-                int row = 0;
-                if (Int32.TryParse(_mapping.Range.InitPosition, out row))
-                    return row;
-
-                return 0;
-            }
-        }
-        #endregion
-
         #region Constructors
         public CursorExcel()
         {
@@ -48,29 +28,33 @@ namespace ReportGrabber.Cursors
         #endregion
 
         #region Functions
-        protected void SetRow(int row)
+        protected int FirstRowIndex(Range range)
         {
-            _row = row;
+            if (String.IsNullOrEmpty(range.InitPosition))
+                return 0;
+
+            int row = 0;
+            if (Int32.TryParse(range.InitPosition, out row))
+                return row;
+
+            return 0;
         }
 
-        public override bool MoveNext()
+        public override bool MoveNext(Range range)
         {
-            if (_mapping == null)
-                throw new CursorNoMappingException();
-
-            this.SetRow(_row < 0 ? this.InitRow : _row + 1);
+            _row = _row < 0 ? this.FirstRowIndex(range) : _row + 1;
 
             int column = 0;
-            if (Int32.TryParse(_mapping.Range.FinishCondition, out column))
+            if (Int32.TryParse(range.FinishCondition, out column))
             {
                 // if in Condition field Column number to check is entered
                 return !String.IsNullOrEmpty(this.GetValue(_row, column));
             }
 
-            return !this.CheckCondition(_mapping.Range.FinishCondition);
+            return !this.CheckCondition(range.FinishCondition);
         }
 
-        protected override bool CheckCondition(Condition condition)
+        public override bool CheckCondition(Condition condition)
         {
             return (SXExpression.Calculate(condition, _environment).Value as SXLexemBool).Value == SXLexemBool.BoolType.True;
         }
@@ -99,9 +83,9 @@ namespace ReportGrabber.Cursors
                 {
                     var second = function.Arguments[1].Calculate(_environment).Value;
                     if (second.Type == SXLexemValue.ValueType.Number)
-                        return this.GetValue(_row + getindex(0), getindex(1));
+                        return this.GetValue(_row + getindex(0), (int)(second as SXLexemNumber).Value);
                     else
-                        return this.GetValue(_row, getindex(0), gettype(1));
+                        return this.GetValue(_row, getindex(0), Value.ParseValueType((second as SXLexemText).Value));
                 }
                 else if (function.Arguments.Count == 3)
                     return this.GetValue(_row + getindex(0), getindex(1), gettype(2));
@@ -111,7 +95,7 @@ namespace ReportGrabber.Cursors
             throw new CursorException(String.Format("Expression Function not recognized: {0}", function.Name));
         }
 
-        protected override Value GetValue(Address address, Value.ValueType type = Value.ValueType.Text)
+        public override Value GetValue(Address address, Value.ValueType type = Value.ValueType.Text)
         {
             if (address == null || String.IsNullOrEmpty(address.Uri))
                 return "";

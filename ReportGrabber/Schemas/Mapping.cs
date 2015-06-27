@@ -10,7 +10,7 @@ namespace ReportGrabber.Schemas
     {
         protected ReportType _type;
         protected Range _range;
-        protected IEnumerable<Condition> _matches;
+        protected Condition _match;
         protected IEnumerable<Field> _fields;
         protected IEnumerable<Rule> _rules;
 
@@ -23,10 +23,10 @@ namespace ReportGrabber.Schemas
             set { _range = value; }
         }
 
-        public IEnumerable<Condition> Matches
+        public Condition Match
         {
-            get { return _matches; }
-            set { _matches = value; }
+            get { return _match; }
+            set { _match = value; }
         }
 
         public IEnumerable<Field> Fields

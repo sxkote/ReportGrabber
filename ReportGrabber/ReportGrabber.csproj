@@ -63,7 +63,6 @@
     <Compile Include="Schemas\Condition.cs" />
     <Compile Include="Schemas\Field.cs" />
     <Compile Include="Schemas\Mapping.cs" />
-    <Compile Include="DataCollection.cs" />
     <Compile Include="Schemas\Range.cs" />
     <Compile Include="Schemas\Rule.cs" />
     <Compile Include="Services\CursorSelector.cs" />
