@@ -65,6 +65,7 @@
     <Compile Include="Schemas\Mapping.cs" />
     <Compile Include="Schemas\Range.cs" />
     <Compile Include="Schemas\Rule.cs" />
+    <Compile Include="Schemas\Vocabulary.cs" />
     <Compile Include="Services\CursorSelector.cs" />
     <Compile Include="Services\ReportTypeSelector.cs" />
     <Compile Include="Values\Value.cs" />

@@ -45,12 +45,29 @@ namespace ReportGrabber
                         continue;
 
                 // get the DataCollection for all the Fields in the Mapping
-                var collection = new DataCollection(mapping.Fields.Select(f => cursor.GetData(f)));
-                if (collection != null && collection.Values != null && collection.Values.Count > 0)
+                var collection = new DataCollection(mapping.Fields.Select(f => this.GetDataFromField(cursor, f)));
+                if (collection.Values != null && collection.Values.Count > 0)
                     result.Add(collection);
             }
 
             return result;
+        }
+
+        protected Data GetDataFromField(ICursor cursor, Field field)
+        {
+            if (cursor == null)
+                throw new CursorException("Can't get Data from null Cursor");
+
+            var value = cursor.GetValue(field.Address, field.Type);
+
+            if (field.Vocabulary != null)
+            {
+                var replacement = field.Vocabulary.Items.FirstOrDefault(i => i.Text.Equals(value.ToString(), StringComparison.InvariantCultureIgnoreCase));
+                if (replacement != null)
+                    value = replacement.Value;
+            }
+
+            return new Data(field.Name, value);
         }
 
         static public IEnumerable<DataCollection> Grab(Report report, params Mapping[] mappings)

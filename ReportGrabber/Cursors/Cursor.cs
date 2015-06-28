@@ -29,12 +29,12 @@ namespace ReportGrabber.Cursors
         /// <returns>The Value that presented on specific Address of current Cursor position</returns>
         Value GetValue(Address address, Value.ValueType type = Value.ValueType.Text);
 
-        /// <summary>
-        /// Get Data item from current position of Cursor for selected Field
-        /// </summary>
-        /// <param name="field">Field that defines the Data parametres (name, address, type)</param>
-        /// <returns>Data for selected Field from the current position</returns>
-        Data GetData(Field field);
+        ///// <summary>
+        ///// Get Data item from current position of Cursor for selected Field
+        ///// </summary>
+        ///// <param name="field">Field that defines the Data parametres (name, address, type)</param>
+        ///// <returns>Data for selected Field from the current position</returns>
+        //Data GetData(Field field);
     }
 
     public abstract class Cursor : ICursor
@@ -45,9 +45,9 @@ namespace ReportGrabber.Cursors
 
         public abstract bool CheckCondition(Condition condition);
 
-        public virtual Data GetData(Field field)
-        {
-            return new Data(field.Name, this.GetValue(field.Address, field.Type));
-        }
+        //public virtual Data GetData(Field field)
+        //{
+        //    return new Data(field.Name, this.GetValue(field.Address, field.Type));
+        //}
     }
 }
