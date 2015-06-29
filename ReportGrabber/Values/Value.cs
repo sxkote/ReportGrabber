@@ -33,7 +33,7 @@ namespace ReportGrabber.Values
 
         static public implicit operator double (Value value)
         {
-            var number = value as ValueNumber;
+            var number = Value.Convert(value, ValueType.Number) as ValueNumber;
             if (number != null)
                 return number.Value;
 
@@ -54,7 +54,7 @@ namespace ReportGrabber.Values
 
         static public implicit operator DateTime(Value value)
         {
-            var number = value as ValueDate;
+            var number = Value.Convert(value, ValueType.Date) as ValueDate;
             if (number != null)
                 return number.Value;
 
@@ -111,6 +111,25 @@ namespace ReportGrabber.Values
                     return Value.ValueType.Number;
 
                 default: return Value.ValueType.Text;
+            }
+        }
+
+        static public Value Convert(Value value, Value.ValueType type)
+        {
+            if (value == null)
+                return null;
+
+            if (value.Type == type)
+                return value;
+
+            switch (type)
+            {
+                case Value.ValueType.Number:
+                    return SXLexemNumber.ParseDouble(value.ToString(), true);
+                case Value.ValueType.Date:
+                    return SXLexemDate.ParseDatetime(value.ToString());
+                default:
+                    return value.ToString();
             }
         }
     }

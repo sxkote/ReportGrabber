@@ -61,7 +61,9 @@ namespace ReportGrabber.Cursors
 
         public override bool CheckCondition(Condition condition)
         {
-            return (SXExpression.Calculate(condition, _environment).Value as SXLexemBool).Value == SXLexemBool.BoolType.True;
+            var expression = condition.Value.StartsWith("=") ? condition.Value.Substring(1) : condition.Value;
+
+            return (SXExpression.Calculate(expression, _environment).Value as SXLexemBool).Value == SXLexemBool.BoolType.True;
         }
 
         protected SXLexemVariable OnFunctionExecuting(SXLexemFunction function)
@@ -107,24 +109,31 @@ namespace ReportGrabber.Cursors
 
             var adr = address.Uri;
 
-            //calculate expression
-            if (adr.StartsWith("=") && adr.Length > 1)
-                return SXExpression.Calculate(adr.Substring(1), _environment);
-
             //calculate column index or RC value
             int row = _row, col = 0;
             if (Int32.TryParse(adr, out col) || CursorExcel.ParseExcelAddress(adr, ref row, ref col))
                 return this.GetValue(row, col, type);
 
-            //get '...' value
-            if (adr.Length >= 2 && adr.IndexOf('\'') == 0 && adr.IndexOf('\'', 1) == adr.Length-1)
-                return adr.Substring(1, adr.Length - 2);
+            //calculate expression
+            var expression = adr.StartsWith("=") ? adr.Substring(1) : adr;
+            return SXExpression.Calculate(expression, _environment);
 
-            //get concatination ... + ... + ...
-            if (adr.Contains('+'))
-                return String.Join("", adr.Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries).Select(part => this.GetValue(part).ToString()));
+            //calculate expression
+            //if (adr.StartsWith("=") && adr.Length > 1)
+            //    return SXExpression.Calculate(adr.Substring(1), _environment);
 
-            throw new CursorException(String.Format("Excel Address not recognized: {0}", adr));
+            ////get '...' value
+            //if (adr.Length >= 2 && adr.IndexOf('\'') == 0 && adr.IndexOf('\'', 1) == adr.Length - 1)
+            //    return Value.Convert(adr.Substring(1, adr.Length - 2), type);
+
+            ////get concatination ... + ... + ...
+            //if (adr.Contains('+'))
+            //{
+            //    var parts = adr.Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries);
+            //    return Value.Convert(String.Join("", parts.Select(part => this.GetValue(part).ToString())), type);                
+            //}
+
+            //throw new CursorException(String.Format("Excel Address not recognized: {0}", adr));
         }
 
         protected abstract Value GetValue(int row, int col, Value.ValueType type = Value.ValueType.Text);
