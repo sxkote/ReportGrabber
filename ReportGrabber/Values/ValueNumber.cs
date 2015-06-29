@@ -6,13 +6,18 @@ using System.Threading.Tasks;
 
 namespace ReportGrabber.Values
 {
+    /// <summary>
+    /// Represents the Numeric Value item from the Report 
+    /// </summary>
     public class ValueNumber : Value
     {
         protected double _value;
 
-        public double Value { get { return _value; } }
+        public double Value 
+        { get { return _value; } }
 
-        public override ValueType Type { get { return ValueType.Number; } }
+        public override ValueType Type 
+        { get { return ValueType.Number; } }
 
         public ValueNumber(double value)
         { _value = value; }

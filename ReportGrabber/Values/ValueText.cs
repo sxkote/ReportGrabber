@@ -6,13 +6,18 @@ using System.Threading.Tasks;
 
 namespace ReportGrabber.Values
 {
+    /// <summary>
+    /// Represents the Text Value item from the Report 
+    /// </summary>
     public class ValueText : Value
     {
         protected string _value;
 
-        public string Value { get { return _value; } }
+        public string Value 
+        { get { return _value; } }
 
-        public override ValueType Type { get { return ValueType.Text; } }
+        public override ValueType Type 
+        { get { return ValueType.Text; } }
 
         public ValueText(string value)
         { _value = value; }

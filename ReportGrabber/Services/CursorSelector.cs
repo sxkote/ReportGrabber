@@ -10,6 +10,11 @@ namespace ReportGrabber.Services
 {
     public interface ICursorSelector
     {
+        /// <summary>
+        /// Define the appropriate Cursor (that could be applied) for selected Report
+        /// </summary>
+        /// <param name="report">Report with data</param>
+        /// <returns>Cursor, that could be applied to the Report data</returns>
         ICursor DefineCursor(Report report);
     }
 

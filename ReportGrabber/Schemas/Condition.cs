@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace ReportGrabber.Schemas
 {
+    /// <summary>
+    /// Condition to be verified on the Report
+    /// </summary>
     public struct Condition
     {
         private string _value;

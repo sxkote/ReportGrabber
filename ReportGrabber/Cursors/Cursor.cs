@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace ReportGrabber.Cursors
 {
+    /// <summary>
+    /// Cursor that could move throug the Report and could grab the data from the Report.
+    /// </summary>
     public interface ICursor
     {
         bool MoveNext(Range range);
@@ -28,13 +31,6 @@ namespace ReportGrabber.Cursors
         /// <param name="type">Type of the Value to be retrieved</param>
         /// <returns>The Value that presented on specific Address of current Cursor position</returns>
         Value GetValue(Address address, Value.ValueType type = Value.ValueType.Text);
-
-        ///// <summary>
-        ///// Get Data item from current position of Cursor for selected Field
-        ///// </summary>
-        ///// <param name="field">Field that defines the Data parametres (name, address, type)</param>
-        ///// <returns>Data for selected Field from the current position</returns>
-        //Data GetData(Field field);
     }
 
     public abstract class Cursor : ICursor
@@ -44,10 +40,5 @@ namespace ReportGrabber.Cursors
         public abstract Value GetValue(Address address, Value.ValueType type = Value.ValueType.Text);
 
         public abstract bool CheckCondition(Condition condition);
-
-        //public virtual Data GetData(Field field)
-        //{
-        //    return new Data(field.Name, this.GetValue(field.Address, field.Type));
-        //}
     }
 }

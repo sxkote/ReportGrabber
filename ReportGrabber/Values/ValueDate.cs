@@ -6,15 +6,20 @@ using System.Threading.Tasks;
 
 namespace ReportGrabber.Values
 {
+    /// <summary>
+    /// Represents the DateTime Value item from the Report 
+    /// </summary>
     public class ValueDate : Value
     {
         public const string Format = "dd.MM.yyyy";
 
         protected DateTime _value;
 
-        public DateTime Value { get { return _value; } }
+        public DateTime Value 
+        { get { return _value; } }
 
-        public override ValueType Type { get { return ValueType.Date; } }
+        public override ValueType Type 
+        { get { return ValueType.Date; } }
 
         public ValueDate(DateTime value)
         { _value = value; }

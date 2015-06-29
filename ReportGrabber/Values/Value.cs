@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace ReportGrabber.Values
 {
+    /// <summary>
+    /// Represents the Value item from the Report (text value, number value, datetime value, ...)
+    /// </summary>
     public abstract class Value
     {
         public enum ValueType { Text, Number, Date };

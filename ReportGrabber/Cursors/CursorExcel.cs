@@ -12,7 +12,7 @@ namespace ReportGrabber.Cursors
 {
     public abstract class CursorExcel : Cursor
     {
-        public const string ExcelAddressPattern = @"(?i)^r(?<rownum>\d+)?c(?<colnum>\d+)?$";
+        public const string ExcelAddressPattern = @"(?i)^r(?<row>\d+)?c(?<col>\d+)?$";
 
         #region Variables
         protected SXEnvironment _environment;
@@ -28,6 +28,11 @@ namespace ReportGrabber.Cursors
         #endregion
 
         #region Functions
+        /// <summary>
+        /// Gets the index of first row to be grabbed
+        /// </summary>
+        /// <param name="range">The Range of the schema that defines the first row index</param>
+        /// <returns>Inde of the first row to be grabbed</returns>
         protected int FirstRowIndex(Range range)
         {
             if (String.IsNullOrEmpty(range.InitPosition))
@@ -132,8 +137,8 @@ namespace ReportGrabber.Cursors
             if (match == null || !match.Success)
                 return false;
 
-            var rowText = match.Groups["rownum"].Value;
-            var colText = match.Groups["colnum"].Value;
+            var rowText = match.Groups["row"].Value;
+            var colText = match.Groups["col"].Value;
 
             int rowValue = 0;
             if (!String.IsNullOrEmpty(rowText) && !Int32.TryParse(rowText, out rowValue))

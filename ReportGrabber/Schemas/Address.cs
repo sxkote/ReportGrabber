@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace ReportGrabber.Schemas
 {
+    /// <summary>
+    /// Address (position) of the Value in the Report 
+    /// </summary>
     public struct Address
     {
         private string _uri;

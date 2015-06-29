@@ -10,6 +10,11 @@ namespace ReportGrabber
 {
     public interface IGrabber
     {
+        /// <summary>
+        /// Grab Data from Report
+        /// </summary>
+        /// <param name="report">Report that contains Data to be grabbed</param>
+        /// <returns>Collection of Data Values grouped to DataCollections</returns>
         IEnumerable<DataCollection> Grab(Report report);
     }
 
@@ -70,14 +75,37 @@ namespace ReportGrabber
             return new Data(field.Name, value);
         }
 
+        /// <summary>
+        /// Grab the Report by Mappings with standart CursorSelector
+        /// </summary>
+        /// <param name="report">Report to grab data from</param>
+        /// <param name="mappings">Mappings that could be applied to the Report</param>
+        /// <returns>Collection of Data Values from Report, depends on Mapping</returns>
         static public IEnumerable<DataCollection> Grab(Report report, params Mapping[] mappings)
         {
             return new Grabber(mappings).Grab(report);
         }
 
+        /// <summary>
+        /// Grab the Report (builded from data) by Mappings with standart CursorSelector
+        /// </summary>
+        /// <param name="data">Data of the Report to be grabbed</param>
+        /// <param name="mappings">Mappings that could be applied to the Report</param>
+        /// <returns>Collection of Data Values from Report, depends on Mapping</returns>
         static public IEnumerable<DataCollection> Grab(byte[] data, params Mapping[] mappings)
         {
             return Grabber.Grab(Report.Load(data), mappings);
+        }
+
+        /// <summary>
+        /// Grab the Report (builded from file) by Mappings with standart CursorSelector
+        /// </summary>
+        /// <param name="filename">Filename the Report to be loaded and grabbed</param>
+        /// <param name="mappings">Mappings that could be applied to the Report</param>
+        /// <returns>Collection of Data Values from Report, depends on Mapping</returns>
+        static public IEnumerable<DataCollection> Grab(string filename, params Mapping[] mappings)
+        {
+            return Grabber.Grab(Report.Load(filename), mappings);
         }
     }
 }
