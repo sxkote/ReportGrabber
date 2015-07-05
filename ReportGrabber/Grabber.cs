@@ -37,7 +37,12 @@ namespace ReportGrabber
                 throw new ReportFormatException();
 
             // define appropriate Mapping for current Report from _mappings list
-            var mapping = _mappings.FirstOrDefault(m => cursor.CheckCondition(m.Match));
+            var mapping = _mappings.FirstOrDefault(m =>
+            {
+                try { return cursor.CheckCondition(m.Match); }
+                catch { return false; }
+            });
+
             if (mapping == null)
                 throw new MappingNotFoundException();
 
