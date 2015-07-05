@@ -67,7 +67,6 @@
     <Compile Include="Schemas\Rule.cs" />
     <Compile Include="Schemas\Vocabulary.cs" />
     <Compile Include="Services\CursorSelector.cs" />
-    <Compile Include="Services\ReportTypeSelector.cs" />
     <Compile Include="Values\Value.cs" />
     <Compile Include="Values\ValueDate.cs" />
     <Compile Include="Values\ValueNumber.cs" />

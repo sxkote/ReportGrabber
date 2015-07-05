@@ -20,7 +20,7 @@ namespace Tests.ReportGrabber
         {
             _mappings = new List<Mapping>();
 
-            _mappings.Add(new Mapping(ReportType.Excel2003, "Ursa")
+            _mappings.Add(new Mapping("Ursa")
             {
                 Range = new Range("2", "6"),
                 Match = "rc(1;1) == \"Кредитор\" && rc(1;2) == \"Текст заголовка документа\" && rc(1;3) == \"Вид документа\" && rc(1;6) == \"Сумма в валюте документа\" && rc(1;8) == \"Текст\"",
@@ -34,7 +34,7 @@ namespace Tests.ReportGrabber
                 }
             });
 
-            _mappings.Add(new Mapping(ReportType.Excel2003, "X5")
+            _mappings.Add(new Mapping("X5")
             {
                 Range = new Range("7", "10"),
                 Match = "rowcol(6;1) == \"ИНН клиента\" && rowcol(6;2) == \"Наименование поставщика\" && rc(6;3) == \"ИНН дебитора\"&& rc(6;5) == \"Сумма\"  && rc(6;6) == \"Дата накладной\" && rc(6;7) == \"Номер накладной\"",
@@ -47,6 +47,8 @@ namespace Tests.ReportGrabber
                     new Field("number", "cell(10).tostring()")
                 }
             });
+
+
 
         }
 
@@ -86,6 +88,13 @@ namespace Tests.ReportGrabber
 
             Assert.AreEqual(7615, duties.Count());
             Assert.AreEqual(62666532.03, duties.Sum(d => d.Summ), _delta);
+        }
+
+        [TestMethod]
+        [DeploymentItem("Reports\\x5-rap.xls")]
+        public void test___()
+        {
+            var duties = this.Grab("x5-rap.xls");
         }
     }
 }
