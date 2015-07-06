@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.22823.1
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReportGrabber", "ReportGrabber\ReportGrabber.csproj", "{C3CC4EF6-69EA-424C-ADEE-29227AEADE3C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{EB272D37-B238-44F8-92A8-302C3B177E12}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.ReportGrabber", "Tests.ReportGrabber\Tests.ReportGrabber.csproj", "{48D17D79-7611-4678-A241-6892A0A80E43}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReportGrabber.Console", "ReportGrabber.Console\ReportGrabber.Console.csproj", "{8BE8F2D2-40FC-4DC0-9570-3D2A01389A6D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,6 +25,10 @@ Global
 		{48D17D79-7611-4678-A241-6892A0A80E43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48D17D79-7611-4678-A241-6892A0A80E43}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48D17D79-7611-4678-A241-6892A0A80E43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BE8F2D2-40FC-4DC0-9570-3D2A01389A6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BE8F2D2-40FC-4DC0-9570-3D2A01389A6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BE8F2D2-40FC-4DC0-9570-3D2A01389A6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BE8F2D2-40FC-4DC0-9570-3D2A01389A6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

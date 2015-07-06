@@ -36,9 +36,8 @@
     <Reference Include="ExcelLibrary">
       <HintPath>..\LIB\dll\ExcelLibrary.dll</HintPath>
     </Reference>
-    <Reference Include="SXCore.Lexems, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Core\SXCore\SXCore.Lexems\bin\Release\SXCore.Lexems.dll</HintPath>
+    <Reference Include="SXCore.Lexems">
+      <HintPath>..\packages\SXCore.Lexems.1.0.2\lib\SXCore.Lexems.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -72,6 +71,9 @@
     <Compile Include="Values\ValueDate.cs" />
     <Compile Include="Values\ValueNumber.cs" />
     <Compile Include="Values\ValueText.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

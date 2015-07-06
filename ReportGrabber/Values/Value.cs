@@ -16,6 +16,8 @@ namespace ReportGrabber.Values
 
         public abstract ValueType Type { get; }
 
+       
+
         static public implicit operator string (Value value)
         {
             if (value == null)
@@ -131,6 +133,58 @@ namespace ReportGrabber.Values
                 default:
                     return value.ToString();
             }
+        }
+
+        static public Value Convert(object obj)
+        {
+            if (obj == null)
+                return new ValueText("");
+
+            if (obj is decimal || obj is double || obj is int)
+                return new ValueNumber(System.Convert.ToDouble(obj));
+
+            if (obj is DateTime)
+                return new ValueDate((DateTime)obj);
+
+            return new ValueText(obj.ToString());
+        }
+
+        static public Value Convert(SXLexemValue value, Value.ValueType type)
+        {
+            if (value == null)
+                throw new ArgumentException("Can't convert null LexemValue to Value");
+
+            switch (type)
+            {
+                case Value.ValueType.Date:
+                    {
+                        if (value.Type == SXLexemValue.ValueType.Date)
+                            return (value as SXLexemDate).Value;
+                        if (value.Type == SXLexemValue.ValueType.Text)
+                            return SXLexemDate.ParseDatetime((value as SXLexemText).Value);
+                        break;
+                    }
+                case Value.ValueType.Number:
+                    {
+                        if (value.Type == SXLexemValue.ValueType.Number)
+                            return (value as SXLexemNumber).Value;
+                        if (value.Type == SXLexemValue.ValueType.Text)
+                            return SXLexemNumber.ParseDouble((value as SXLexemText).Value, true);
+                        break;
+                    }
+                default:
+                    {
+                        if (value.Type == SXLexemValue.ValueType.Text)
+                            return (value as SXLexemText).Value;
+                        if (value.Type == SXLexemValue.ValueType.Number)
+                            return (value as SXLexemNumber).Value.ToString();
+                        if (value.Type == SXLexemValue.ValueType.Date)
+                            return (value as SXLexemDate).Value.ToString();
+                        break;
+                    }
+            }
+
+            throw new ReportGrabberException(String.Format("LexemValue {0} not recognized as Value", value.ToString()));
         }
     }
 }

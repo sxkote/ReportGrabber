@@ -36,7 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="SXCore.Lexems">
-      <HintPath>..\..\Core\SXCore\SXCore.Lexems\bin\Release\SXCore.Lexems.dll</HintPath>
+      <HintPath>..\packages\SXCore.Lexems.1.0.2\lib\SXCore.Lexems.dll</HintPath>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
@@ -54,6 +54,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Duty.cs" />
+    <Compile Include="Limit.cs" />
     <Compile Include="TestReports.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -64,6 +65,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Reports\auchan_payment.xls">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -71,6 +73,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Reports\castorama_limit.xls">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Reports\castorama_limit_2.xls">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Reports\lenta_confirm.xls">

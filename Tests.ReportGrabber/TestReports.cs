@@ -29,7 +29,7 @@ namespace Tests.ReportGrabber
                 { 
                     new Field("type", "3", Value.ValueType.Text, new Vocabulary(new VocabularyItem("RE", "Waybill"))), 
                     new Field("date", "cell(8).substring(cell(8).indexof(\" от \") + 4)"), 
-                    new Field("summ", "-cell(6, \"\number\")", Value.ValueType.Number), 
+                    new Field("summ", "-getnumber(6)", Value.ValueType.Number), 
                     new Field("number", "cell(8).substring(cell(8).indexof(\"счф \") + 4; cell(8).indexof(\" от \") - cell(8).indexof(\"счф\") - 4)")
                 }
             });
@@ -48,6 +48,47 @@ namespace Tests.ReportGrabber
                 }
             });
 
+            _mappings.Add(new Mapping(ReportType.Excel2003, "Castorama")
+            {
+                Range = new Range("2", "1"),
+                Match = "rc(1;2) == \"Счет\" && rc(1;6).contains(\"Дата\") && rc(1;7) == \"Номер\" && rc(1;8).contains(\"Сумма\")",
+                Fields = new List<Field>() 
+                {
+                    new Field("contract", "getnumber(2)", Value.ValueType.Text),
+                    new Field("date", "getdate(6)", Value.ValueType.Date),
+                    new Field("number", "gettext(7)", Value.ValueType.Text),
+                    new Field("summ", "getnumber(8)", Value.ValueType.Number), 
+                    new Field("type", "'Waybill'", Value.ValueType.Text)
+                }
+            });
+
+            _mappings.Add(new Mapping(ReportType.Excel2003, "Castorama2")
+            {
+                Range = new Range("2", "1"),
+                Match = "rc(1;1) == \"Счет\" && rc(1;2).contains(\"Дата\") && rc(1;3) == \"Ссылка\" && rc(1;4).contains(\"Сумма\")",
+                Fields = new List<Field>() 
+                {
+                    new Field("contract", "gettext(1)", Value.ValueType.Text),
+                    new Field("date", "getdate(2)", Value.ValueType.Date),
+                    new Field("number", "gettext(3)", Value.ValueType.Text),
+                    new Field("summ", "getnumber(4)", Value.ValueType.Number), 
+                    new Field("type", "'Waybill'", Value.ValueType.Text)
+                }
+            });
+
+            _mappings.Add(new Mapping(ReportType.Excel2003, "Leroy")
+            {
+                Range = new Range("7", "7"),
+                Match = "rc(6;2) == \"Наименование поставщика / Name of Supplier\"",
+                Fields = new List<Field>() 
+                {
+                    new Field("contract", "gettext(2)", Value.ValueType.Text),
+                    new Field("date", "getdate(6)"),
+                    new Field("number", "gettext(5)", Value.ValueType.Text),
+                    new Field("summ", "getnumber(7)", Value.ValueType.Number), 
+                    new Field("type", "'Waybill'", Value.ValueType.Text)
+                }
+            });
         }
 
         public List<Duty> Grab(string filename)
@@ -57,6 +98,7 @@ namespace Tests.ReportGrabber
             return grabbed.Select(dataCollection => new Duty()
             {
                 Type = dataCollection["type"],
+                Contract = dataCollection["contract"],
                 Number = dataCollection["number"],
                 Date = dataCollection["date"],
                 Summ = dataCollection["summ"]
@@ -86,6 +128,55 @@ namespace Tests.ReportGrabber
 
             Assert.AreEqual(7615, duties.Count());
             Assert.AreEqual(62666532.03, duties.Sum(d => d.Summ), _delta);
+        }
+
+        [TestMethod]
+        [DeploymentItem("Reports\\castorama_limit.xls")]
+        public void test_castorama()
+        {
+            var duties = this.Grab("castorama_limit.xls");
+
+            var limits = duties.GroupBy(x => x.Contract)
+                .Select(l => new { Contract = l.Key, Value = (decimal)l.Sum(s => s.Summ) * -1 })
+                .Select(limitCollection => new Limit()
+                {
+                    Contract = limitCollection.Contract,
+                    Comment = "",
+                    Date = DateTime.Now.Date,
+                    LimitValue = limitCollection.Value                   
+                })
+                .ToList();
+
+            //var limits = duties.GroupBy(x => x.Contract)
+            //    .Select(l => new 
+            //    { 
+            //        Contract = l.Key,
+            //        Value = l.Sum(s => s.Summ) 
+            //    });
+
+
+            Assert.AreEqual(944, duties.Count());
+            Assert.AreEqual(-144423153.01, duties.Sum(d => d.Summ));
+        }
+
+        [TestMethod]
+        [DeploymentItem("Reports\\castorama_limit_2.xls")]
+        public void test_castorama2()
+        {
+            var duties = this.Grab("castorama_limit_2.xls");
+
+            Assert.AreEqual(944, duties.Count());
+        }
+
+        [TestMethod]
+        [DeploymentItem("Reports\\leroy_limit.xls")]
+        public void test_leroy()
+        {
+            var duties = this.Grab("leroy_limit.xls");
+
+            var limits = duties
+                .GroupBy(x => x.Contract).Select(l => new { Contract = l.Key, Value = l.Sum(s => s.Summ) });
+
         }
     }
 }

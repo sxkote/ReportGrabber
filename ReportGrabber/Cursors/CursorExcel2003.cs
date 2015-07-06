@@ -35,13 +35,17 @@ namespace ReportGrabber.Cursors
             if (cell == null || cell.Value == null || cell.IsEmpty)
                 return "";
 
-            var cellType = cell.Format.FormatType;
+            //var cellType = cell.Format.FormatType;
 
-            if (type == Value.ValueType.Date || cellType == CellFormatType.DateTime || cellType == CellFormatType.Date)
+            if (type == Value.ValueType.Date)
+            {
                 return cell.DateTimeValue;
+            }
 
-            if (type == Value.ValueType.Number || cellType == CellFormatType.Number || cellType == CellFormatType.Currency || cellType == CellFormatType.Percentage)
+            if (type == Value.ValueType.Number)
+            {
                 return Convert.ToDouble(cell.Value);
+            }
 
             return cell.StringValue;
         }

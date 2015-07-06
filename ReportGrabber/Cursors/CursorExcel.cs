@@ -99,6 +99,30 @@ namespace ReportGrabber.Cursors
                 #endregion
             }
 
+            if (function.Name.Equals("getdate", StringComparison.InvariantCultureIgnoreCase))
+            {
+                if (function.Arguments.Count == 1)
+                    return this.GetValue(_row, getindex(0), Value.ValueType.Date);
+                else if (function.Arguments.Count == 2)
+                    return this.GetValue(_row + getindex(0), getindex(1), Value.ValueType.Date);
+            }
+
+            if (function.Name.Equals("getnumber", StringComparison.InvariantCultureIgnoreCase))
+            {
+                if (function.Arguments.Count == 1)
+                    return this.GetValue(_row, getindex(0), Value.ValueType.Number);
+                else if (function.Arguments.Count == 2)
+                    return this.GetValue(_row + getindex(0), getindex(1), Value.ValueType.Number);
+            }
+
+            if (function.Name.Equals("gettext", StringComparison.InvariantCultureIgnoreCase))
+            {
+                if (function.Arguments.Count == 1)
+                    return this.GetValue(_row, getindex(0), Value.ValueType.Text);
+                else if (function.Arguments.Count == 2)
+                    return this.GetValue(_row + getindex(0), getindex(1), Value.ValueType.Text);
+            }
+
             throw new CursorException(String.Format("Expression Function not recognized: {0}", function.Name));
         }
 
@@ -116,7 +140,12 @@ namespace ReportGrabber.Cursors
 
             //calculate expression
             var expression = adr.StartsWith("=") ? adr.Substring(1) : adr;
-            return SXExpression.Calculate(expression, _environment);
+            var calc = SXExpression.Calculate(expression, _environment);
+            if (calc == null || calc.Value == null)
+                throw new CursorException("Can't evaluate expression");
+
+            return Value.Convert(calc.Value, type);
+            
 
             //calculate expression
             //if (adr.StartsWith("=") && adr.Length > 1)
