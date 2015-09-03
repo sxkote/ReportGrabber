@@ -15,7 +15,7 @@ namespace ReportGrabber
         /// </summary>
         /// <param name="report">Report that contains Data to be grabbed</param>
         /// <returns>Collection of Data Values grouped to DataCollections</returns>
-        IEnumerable<DataCollection> Grab(Report report);
+        IEnumerable<DataCollection> Grab(IReport report);
     }
 
     public class Grabber : IGrabber
@@ -29,7 +29,7 @@ namespace ReportGrabber
             _cursorSelector = cursorSelector == null ? new CursorSelector() : cursorSelector;
         }
 
-        public IEnumerable<DataCollection> Grab(Report report)
+        public IEnumerable<DataCollection> Grab(IReport report)
         {
             // define appropriate Cursor for current Report
             var cursor = _cursorSelector.DefineCursor(report);
@@ -37,7 +37,12 @@ namespace ReportGrabber
                 throw new ReportFormatException();
 
             // define appropriate Mapping for current Report from _mappings list
-            var mapping = _mappings.FirstOrDefault(m => cursor.CheckCondition(m.Match));
+            var mapping = _mappings.FirstOrDefault(m =>
+            {
+                try { return cursor.CheckCondition(m.Match); }
+                catch { return false; }
+            });
+
             if (mapping == null)
                 throw new MappingNotFoundException();
 
@@ -81,7 +86,7 @@ namespace ReportGrabber
         /// <param name="report">Report to grab data from</param>
         /// <param name="mappings">Mappings that could be applied to the Report</param>
         /// <returns>Collection of Data Values from Report, depends on Mapping</returns>
-        static public IEnumerable<DataCollection> Grab(Report report, params Mapping[] mappings)
+        static public IEnumerable<DataCollection> Grab(IReport report, params Mapping[] mappings)
         {
             return new Grabber(mappings).Grab(report);
         }

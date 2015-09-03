@@ -54,7 +54,11 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Duty.cs" />
+<<<<<<< HEAD
     <Compile Include="Limit.cs" />
+=======
+    <Compile Include="Example.cs" />
+>>>>>>> origin/master
     <Compile Include="TestReports.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

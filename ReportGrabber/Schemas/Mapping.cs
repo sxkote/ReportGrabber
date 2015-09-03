@@ -11,7 +11,7 @@ namespace ReportGrabber.Schemas
     /// </summary>
     public class Mapping
     {
-        protected ReportType _type;
+        //protected ReportType _type;
         protected string _title;
 
         protected Range _range;
@@ -20,12 +20,12 @@ namespace ReportGrabber.Schemas
         protected IEnumerable<Field> _fields;
         protected IEnumerable<Rule> _rules;
 
-        /// <summary>
-        /// Type of the Report that suits this Mapping 
-        /// (Report Type that Mapping could be applied to)
-        /// </summary>
-        public ReportType Type
-        { get { return _type; } }
+        ///// <summary>
+        ///// Type of the Report that suits this Mapping 
+        ///// (Report Type that Mapping could be applied to)
+        ///// </summary>
+        //public ReportType Type
+        //{ get { return _type; } }
 
         /// <summary>
         /// Title of the Mapping
@@ -69,9 +69,9 @@ namespace ReportGrabber.Schemas
             set { _rules = value; }
         }
 
-        public Mapping(ReportType type, string title = "")
+        public Mapping(string title = "")
         {
-            _type = type;
+            //_type = type;
             _title = title;
         }
     }
