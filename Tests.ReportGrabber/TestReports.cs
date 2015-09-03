@@ -48,8 +48,7 @@ namespace Tests.ReportGrabber
                 }
             });
 
-<<<<<<< HEAD
-            _mappings.Add(new Mapping(ReportType.Excel2003, "Castorama")
+            _mappings.Add(new Mapping("Castorama")
             {
                 Range = new Range("2", "1"),
                 Match = "rc(1;2) == \"Счет\" && rc(1;6).contains(\"Дата\") && rc(1;7) == \"Номер\" && rc(1;8).contains(\"Сумма\")",
@@ -63,7 +62,7 @@ namespace Tests.ReportGrabber
                 }
             });
 
-            _mappings.Add(new Mapping(ReportType.Excel2003, "Castorama2")
+            _mappings.Add(new Mapping("Castorama2")
             {
                 Range = new Range("2", "1"),
                 Match = "rc(1;1) == \"Счет\" && rc(1;2).contains(\"Дата\") && rc(1;3) == \"Ссылка\" && rc(1;4).contains(\"Сумма\")",
@@ -77,7 +76,7 @@ namespace Tests.ReportGrabber
                 }
             });
 
-            _mappings.Add(new Mapping(ReportType.Excel2003, "Leroy")
+            _mappings.Add(new Mapping("Leroy")
             {
                 Range = new Range("7", "7"),
                 Match = "rc(6;2) == \"Наименование поставщика / Name of Supplier\"",
@@ -90,10 +89,6 @@ namespace Tests.ReportGrabber
                     new Field("type", "'Waybill'", Value.ValueType.Text)
                 }
             });
-=======
-
-
->>>>>>> origin/master
         }
 
         public List<Duty> Grab(string filename)
@@ -136,7 +131,6 @@ namespace Tests.ReportGrabber
         }
 
         [TestMethod]
-<<<<<<< HEAD
         [DeploymentItem("Reports\\castorama_limit.xls")]
         public void test_castorama()
         {
@@ -149,7 +143,7 @@ namespace Tests.ReportGrabber
                     Contract = limitCollection.Contract,
                     Comment = "",
                     Date = DateTime.Now.Date,
-                    LimitValue = limitCollection.Value                   
+                    LimitValue = limitCollection.Value
                 })
                 .ToList();
 
@@ -182,13 +176,6 @@ namespace Tests.ReportGrabber
 
             var limits = duties
                 .GroupBy(x => x.Contract).Select(l => new { Contract = l.Key, Value = l.Sum(s => s.Summ) });
-
-=======
-        [DeploymentItem("Reports\\x5-rap.xls")]
-        public void test___()
-        {
-            var duties = this.Grab("x5-rap.xls");
->>>>>>> origin/master
         }
     }
 }
